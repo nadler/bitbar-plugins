@@ -11,27 +11,26 @@
 
 import json, urllib2
 
-def get_stock_price(stock):
-	response = urllib2.urlopen('https://api.iextrading.com/1.0/stock/' + stock + '/quote')
+def get_stock_prices(stocks):
+	response = urllib2.urlopen('https://api.iextrading.com/1.0/stock/market/batch?symbols=' + stocks +
+		'&types=quote&displayPercent=true&filter=latestPrice,changePercent')
 	return json.loads(response.read())
 
 def create_output_string(stock):
 	output = stock
-	output += " - $"
-	output += "{:0.2f}".format(response["latestPrice"])
-	output += " (" + "{:0.2f}".format(response["changePercent"] * 100.00) + "%)"
+	changePercent = response[stock]["quote"]["changePercent"]
+ 	output += " - $"
+ 	output += "{:0.2f}".format(response[stock]["quote"]["latestPrice"])
+ 	output += " (" + "{:0.2f}".format(changePercent) + "%)"
 
-	color = "red" if response["changePercent"] < 0 else "green"
-	output += " | color=" + color
+ 	color = "red" if changePercent < 0 else "green"
+ 	output += " | color=" + color
 
 	return output
 
-menubar_stock = "SPY"
-response = get_stock_price(menubar_stock)
-print create_output_string(menubar_stock)
+stocks = ["SPY", "ATHM", "AMZN", "BZUN", "NOW", "CRM", "PAYC", "NFLX", "AAPL", "TSLA", "FB", "QTM", "GOOGL", "JCP"]
+response = get_stock_prices( ",".join(stocks) )
+print create_output_string(stocks[0]) # first item displays in the menubar
 print '---'
-
-stocks = ["SPY", "AAPL", "FB", "QTM", "GOOGL", "AMZN", "NFLX", "JCP"]
 for stock in stocks:
-	response = get_stock_price(stock)
 	print create_output_string(stock)
